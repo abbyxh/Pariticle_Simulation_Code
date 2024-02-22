@@ -46,7 +46,12 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B1DetectorConstruction::B1DetectorConstruction()
+<<<<<<< HEAD
 : G4VUserDetectorConstruction()
+=======
+: G4VUserDetectorConstruction(),
+  fScoringVolume(0),
+>>>>>>> e7d5e4f8b047deb2db2df264afc3e0e41bbbc051
 { }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -183,6 +188,18 @@ for (G4int i{0}; i < 64; ++i)
                       
       G4LogicalVolume* logicResOut =                         
         new G4LogicalVolume(solidShape3, res_mat_outer, "Resistor_out", 0, 0, 0);           //its name
+<<<<<<< HEAD
+=======
+                    
+      new G4PVPlacement(0,                       //no rotation
+                        pos_res_outer,                    //at position
+                        logicResOut,             //its logical volume
+                        "Resistor_out",                //its name
+                        logicEnv,                //its mother  volume
+                        false,                   //no boolean operation
+                        copyNo,                       //copy number
+                        checkOverlaps);          //overlaps checking
+>>>>>>> e7d5e4f8b047deb2db2df264afc3e0e41bbbc051
 
     if (copyNo<5)
     {
@@ -248,6 +265,7 @@ for (G4int i{0}; i < 64; ++i)
 
   for (G4int copyNo=0; copyNo<3; copyNo++) {
 
+<<<<<<< HEAD
     G4ThreeVector pos_cap_outer = G4ThreeVector(capacitor[copyNo][0], capacitor[copyNo][1], capacitor[copyNo][2]);
             
     G4LogicalVolume* logicCapOut = 
@@ -281,6 +299,40 @@ for (G4int i{0}; i < 64; ++i)
                       checkOverlaps);  
     }
 
+=======
+      G4ThreeVector pos_cap_outer = G4ThreeVector(capacitor[copyNo][0], capacitor[copyNo][1], capacitor[copyNo][2]);
+              
+      G4LogicVolume* logicCapOut = 
+        new G4LogicalVolume(solidShape1, cap_mat_outer, "Capacitor_out", 0, 0, 0);           
+                    
+      new G4PVPlacement(0,                       //no rotation
+                        pos_cap_outer,                    //at position
+                        logicCapOut,             //its logical volume
+                        "Capacitor_out",                //its name
+                        logicEnv,                //its mother  volume
+                        false,                   //no boolean operation
+                        copyNo,                       //copy number
+                        checkOverlaps);          //overlaps checking
+    }
+
+  ///Inner Capacitor///
+
+  G4Tubs* solidShape2 =    
+    new G4Tubs("Capacitor_in", 
+    0., inner_cap_radius, inner_cap_height/2, 0. * deg, 360. * deg);
+                      
+  G4LogicVolume* logicCapIn = 
+    G4LogicalVolume(solidShape2, cap_mat_inner, "Capacitor_in", 0, 0, 0); 
+               
+  new G4PVPlacement(0,                       //no rotation
+                    G4ThreeVector(0, 0, 0),                    //at position
+                    logicCapIn,             //its logical volume
+                    "Capacitor_in",                //its name
+                    logicCapOut,                //its mother  volume
+                    false,                   //no boolean operation
+                    0,                       //copy number
+                    checkOverlaps);  
+>>>>>>> e7d5e4f8b047deb2db2df264afc3e0e41bbbc051
 
   /////For the chips/////
   std::array<std::array<G4double, 3>, 4> chip = {{{3.5, -21, -4}, {3.5, -7, -4}, {3.5, 6, -4}, {3.5, 16, -4}}};
