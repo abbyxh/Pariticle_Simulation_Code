@@ -33,6 +33,7 @@
 
 #include "G4RunManager.hh"
 #include "G4NistManager.hh"
+#include "G4Tubs.hh"
 #include "G4Box.hh"
 #include "G4Cons.hh"
 #include "G4Orb.hh"
@@ -47,10 +48,6 @@
 B1DetectorConstruction::B1DetectorConstruction()
 : G4VUserDetectorConstruction(),
   fScoringVolume(0),
-  flogicResOut(NULL),
-  flogicResIn(NULL),
-  flogicCapOut(NULL),
-  flogicCapIn(NULL)
 { }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -183,17 +180,17 @@ for (G4int i{0}; i < 64; ++i)
           new G4Tubs("Resistor_out", 
             0., outer_res_radius, outer_res_height/2, resistor[copyNo][3] * deg, 360. * deg);
                       
-        flogicResOut =                         
-          new G4LogicalVolume(solidShape3, res_mat_outer, "Resistor_out", 0, 0, 0);           //its name
+      G4LogicalVolume* logicResOut =                         
+        new G4LogicalVolume(solidShape3, res_mat_outer, "Resistor_out", 0, 0, 0);           //its name
                     
-        new G4PVPlacement(0,                       //no rotation
-                          pos_res_outer,                    //at position
-                          flogicResOut,             //its logical volume
-                          "Resistor_out",                //its name
-                          logicEnv,                //its mother  volume
-                          false,                   //no boolean operation
-                          copyNo,                       //copy number
-                          checkOverlaps);          //overlaps checking
+      new G4PVPlacement(0,                       //no rotation
+                        pos_res_outer,                    //at position
+                        logicResOut,             //its logical volume
+                        "Resistor_out",                //its name
+                        logicEnv,                //its mother  volume
+                        false,                   //no boolean operation
+                        copyNo,                       //copy number
+                        checkOverlaps);          //overlaps checking
 
 
         //Inner metal of resistor
@@ -202,13 +199,14 @@ for (G4int i{0}; i < 64; ++i)
     new G4Tubs("Resistor_in", 
       0., inner_res_radius, inner_res_height/2, resistor[copyNo][3] * deg, 360. * deg);
                       
-  flogicResIn = new G4LogicalVolume(solidShape4, res_mat_inner, "Resistor_in", 0, 0, 0);           
+  G4LogicalVolume* logicResIn = 
+    new G4LogicalVolume(solidShape4, res_mat_inner, "Resistor_in", 0, 0, 0);           
                
   new G4PVPlacement(0,                       //no rotation
                     G4ThreeVector(0, 0, 0),                    //at position
-                    flogicResIn,             //its logical volume
+                    logicResIn,             //its logical volume
                     "Resistor_in",                //its name
-                    flogicResOut,                //its mother  volume
+                    logicResOut,                //its mother  volume
                     false,                   //no boolean operation
                     0,                       //copy number
                     checkOverlaps); 
@@ -238,16 +236,17 @@ for (G4int i{0}; i < 64; ++i)
 
       G4ThreeVector pos_cap_outer = G4ThreeVector(capacitor[copyNo][0], capacitor[copyNo][1], capacitor[copyNo][2]);
               
-        flogicCapOut = new G4LogicalVolume(solidShape1, cap_mat_outer, "Capacitor_out", 0, 0, 0);           
+      G4LogicVolume* logicCapOut = 
+        new G4LogicalVolume(solidShape1, cap_mat_outer, "Capacitor_out", 0, 0, 0);           
                     
-        new G4PVPlacement(0,                       //no rotation
-                          pos_cap_outer,                    //at position
-                          flogicCapOut,             //its logical volume
-                          "Capacitor_out",                //its name
-                          logicEnv,                //its mother  volume
-                          false,                   //no boolean operation
-                          copyNo,                       //copy number
-                          checkOverlaps);          //overlaps checking
+      new G4PVPlacement(0,                       //no rotation
+                        pos_cap_outer,                    //at position
+                        logicCapOut,             //its logical volume
+                        "Capacitor_out",                //its name
+                        logicEnv,                //its mother  volume
+                        false,                   //no boolean operation
+                        copyNo,                       //copy number
+                        checkOverlaps);          //overlaps checking
     }
 
   ///Inner Capacitor///
@@ -256,13 +255,14 @@ for (G4int i{0}; i < 64; ++i)
     new G4Tubs("Capacitor_in", 
     0., inner_cap_radius, inner_cap_height/2, 0. * deg, 360. * deg);
                       
-  flogicCapIn = G4LogicalVolume(solidShape2, cap_mat_inner, "Capacitor_in", 0, 0, 0); 
+  G4LogicVolume* logicCapIn = 
+    G4LogicalVolume(solidShape2, cap_mat_inner, "Capacitor_in", 0, 0, 0); 
                
   new G4PVPlacement(0,                       //no rotation
                     G4ThreeVector(0, 0, 0),                    //at position
-                    flogicCapIn,             //its logical volume
+                    logicCapIn,             //its logical volume
                     "Capacitor_in",                //its name
-                    flogicCapOut,                //its mother  volume
+                    logicCapOut,                //its mother  volume
                     false,                   //no boolean operation
                     0,                       //copy number
                     checkOverlaps);  
