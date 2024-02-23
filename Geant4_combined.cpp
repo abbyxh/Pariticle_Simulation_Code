@@ -46,8 +46,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B1DetectorConstruction::B1DetectorConstruction()
-: G4VUserDetectorConstruction(),
-  fScoringVolume(0),
+: G4VUserDetectorConstruction()
 { }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -64,7 +63,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
   
   // Envelope parameters
   //
-  G4double env_sizeX = 28, env_sizeY = 60, env_sizeZ = 18;
+  G4double env_sizeX = 29, env_sizeY = 61, env_sizeZ = 20;
   G4Material* env_mat = nist->FindOrBuildMaterial("G4_AIR");
    
   // Option to switch on/off checking of volumes overlaps
@@ -104,9 +103,6 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
 ////Creating an array of points for components inside the envelope////
 ///Loop for envelope///
 
-G4double pixelXLength {60};
-G4double pixelYLength {28};
-G4double pixelZLength {18};
 
 int len {4};
 std::array<std::array<double, 3>, 64> pixelLocations{};
@@ -117,14 +113,14 @@ for(int i{0}; i < len; i += 2)
   {
     for(int k{0}; k < len; ++k)
     {
-      pixelLocations[k + len * j + len * len * i][2] = i * pixelZLength;
-      pixelLocations[k + len * j + len * len * i][1] = j * pixelYLength;
-      pixelLocations[k + len * j + len * len * i][0] = k * pixelXLength;
+      pixelLocations[k + len * j + len * len * i][2] = i * env_sizeZ;
+      pixelLocations[k + len * j + len * len * i][1] = j * env_sizeY;
+      pixelLocations[k + len * j + len * len * i][0] = k * env_sizeX;
 
       //every other z layer is offset
-      pixelLocations[k + len * j + len * len * (i + 1)][2] = i * pixelZLength;
-      pixelLocations[k + len * j + len * len * (i + 1)][1] = (j + 0.5) * pixelYLength;
-      pixelLocations[k + len * j + len * len * (i + 1)][0] = (k + 0.5) * pixelXLength;
+      pixelLocations[k + len * j + len * len * (i + 1)][2] = i * env_sizeZ;
+      pixelLocations[k + len * j + len * len * (i + 1)][1] = (j + 0.5) * env_sizeY;
+      pixelLocations[k + len * j + len * len * (i + 1)][0] = (k + 0.5) * env_sizeX;
     }
   }
 }
@@ -135,7 +131,7 @@ for (G4int i{0}; i < 64; ++i)
 {
   G4Box* solidEnv =    
     new G4Box("Envelope",                    
-        0.5*pixelXLength, 0.5*pixelYLength, 0.5*pixelZLength);
+        0.5*env_sizeX, 0.5*env_sizeY, 0.5*env_sizeZ);
       
   G4LogicalVolume* logicEnv =
     new G4LogicalVolume(solidEnv,            //its solid
@@ -151,12 +147,11 @@ for (G4int i{0}; i < 64; ++i)
                     i,                       //copy number
                     checkOverlaps);
 
-}
   
   //     
   // Resistor
   //
-  std::array<std::array<G4double, 4>, 7> resistor = {{{4.5, -28, -2, 0}, {4.5, -14, -2, 0}, {4.5, 28, -2, 0}, {-8.5, 28, -2, 0}, {5, 10, 2, 0}, {11, 0, -2, 90}, {-2, 13.5, -2, 90}}};
+  std::array<std::array<G4double, 4>, 7> resistor = {{{3.5, -28, -3}, {3.5, -14, -3}, {3.5, 28, -3}, {-8.5, 28, -3}, {5, 15.5, 3}, {11, 0, -3}, {-3, 17.5, -3}}};
 
   G4Material* res_mat_outer = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");
  
@@ -170,6 +165,12 @@ for (G4int i{0}; i < 64; ++i)
   G4double inner_res_radius = 2.9;
   G4double inner_res_height = 0.9;
 
+  G4RotationMatrix* rotationMatrixUp = new G4RotationMatrix();
+  rotationMatrixUp->rotateY(90.*deg);
+
+  G4RotationMatrix* rotationMatrixAcross = new G4RotationMatrix();
+  rotationMatrixAcross->rotateX(90.*deg);
+
   ////Loop to change the points///
 
   for (G4int copyNo=0; copyNo<7; copyNo++) {
@@ -178,12 +179,14 @@ for (G4int i{0}; i < 64; ++i)
 
       G4Tubs* solidShape3 =    
           new G4Tubs("Resistor_out", 
-            0., outer_res_radius, outer_res_height/2, resistor[copyNo][3] * deg, 360. * deg);
+            0., outer_res_radius, outer_res_height/2, 0 * deg, 360. * deg);
                       
       G4LogicalVolume* logicResOut =                         
         new G4LogicalVolume(solidShape3, res_mat_outer, "Resistor_out", 0, 0, 0);           //its name
-                    
-      new G4PVPlacement(0,                       //no rotation
+
+    if (copyNo<5)
+    {
+      new G4PVPlacement(rotationMatrixAcross,                       //no rotation
                         pos_res_outer,                    //at position
                         logicResOut,             //its logical volume
                         "Resistor_out",                //its name
@@ -191,13 +194,24 @@ for (G4int i{0}; i < 64; ++i)
                         false,                   //no boolean operation
                         copyNo,                       //copy number
                         checkOverlaps);          //overlaps checking
-
+    }
+    else
+    {
+      new G4PVPlacement(rotationMatrixUp,                       //no rotation
+                        pos_res_outer,                    //at position
+                        logicResOut,             //its logical volume
+                        "Resistor_out",                //its name
+                        logicEnv,                //its mother  volume
+                        false,                   //no boolean operation
+                        copyNo,                       //copy number
+                        checkOverlaps);          //overlaps checking
+    }
 
         //Inner metal of resistor
 
   G4Tubs* solidShape4 =    
     new G4Tubs("Resistor_in", 
-      0., inner_res_radius, inner_res_height/2, resistor[copyNo][3] * deg, 360. * deg);
+      0., inner_res_radius, inner_res_height/2, 0 * deg, 360. * deg);
                       
   G4LogicalVolume* logicResIn = 
     new G4LogicalVolume(solidShape4, res_mat_inner, "Resistor_in", 0, 0, 0);           
@@ -214,7 +228,7 @@ for (G4int i{0}; i < 64; ++i)
 
   ///Capacitor///////
 
-  std::array<std::array<G4double, 3>, 3> capacitor = {{{0.5, -14, -2}, {0.5, 0, -2}, {6, 20, -2}}};
+  std::array<std::array<G4double, 3>, 3> capacitor = {{{-4, -14, -3}, {-4, 0, -3}, {3.5, 24, -3}}};
 
   //Capacior
   //Outer plastic of capacitor
@@ -233,45 +247,42 @@ for (G4int i{0}; i < 64; ++i)
                     
 
   for (G4int copyNo=0; copyNo<3; copyNo++) {
+    
+    G4ThreeVector pos_cap_outer = G4ThreeVector(capacitor[copyNo][0], capacitor[copyNo][1], capacitor[copyNo][2]);
+            
+    G4LogicalVolume* logicCapOut = 
+      new G4LogicalVolume(solidShape1, cap_mat_outer, "Capacitor_out", 0, 0, 0);           
+                  
+    new G4PVPlacement(0,                       //no rotation
+                      pos_cap_outer,                    //at position
+                      logicCapOut,             //its logical volume
+                      "Capacitor_out",                //its name
+                      logicEnv,                //its mother  volume
+                      false,                   //no boolean operation
+                      copyNo,                       //copy number
+                      checkOverlaps);          //overlaps checking
 
-      G4ThreeVector pos_cap_outer = G4ThreeVector(capacitor[copyNo][0], capacitor[copyNo][1], capacitor[copyNo][2]);
-              
-      G4LogicVolume* logicCapOut = 
-        new G4LogicalVolume(solidShape1, cap_mat_outer, "Capacitor_out", 0, 0, 0);           
-                    
-      new G4PVPlacement(0,                       //no rotation
-                        pos_cap_outer,                    //at position
-                        logicCapOut,             //its logical volume
-                        "Capacitor_out",                //its name
-                        logicEnv,                //its mother  volume
-                        false,                   //no boolean operation
-                        copyNo,                       //copy number
-                        checkOverlaps);          //overlaps checking
+     ///Inner Capacitor///
+
+    G4Tubs* solidShape2 =    
+      new G4Tubs("Capacitor_in", 
+      0., inner_cap_radius, inner_cap_height/2, 0. * deg, 360. * deg);
+                        
+    G4LogicalVolume* logicCapIn = 
+      new G4LogicalVolume(solidShape2, cap_mat_inner, "Capacitor_in", 0, 0, 0); 
+                
+    new G4PVPlacement(0,                       //no rotation
+                      G4ThreeVector(0, 0, 0),                    //at position
+                      logicCapIn,             //its logical volume
+                      "Capacitor_in",                //its name
+                      logicCapOut,                //its mother  volume
+                      false,                   //no boolean operation
+                      0,                       //copy number
+                      checkOverlaps);  
     }
 
-  ///Inner Capacitor///
-
-  G4Tubs* solidShape2 =    
-    new G4Tubs("Capacitor_in", 
-    0., inner_cap_radius, inner_cap_height/2, 0. * deg, 360. * deg);
-                      
-  G4LogicVolume* logicCapIn = 
-    G4LogicalVolume(solidShape2, cap_mat_inner, "Capacitor_in", 0, 0, 0); 
-               
-  new G4PVPlacement(0,                       //no rotation
-                    G4ThreeVector(0, 0, 0),                    //at position
-                    logicCapIn,             //its logical volume
-                    "Capacitor_in",                //its name
-                    logicCapOut,                //its mother  volume
-                    false,                   //no boolean operation
-                    0,                       //copy number
-                    checkOverlaps);  
-
   /////For the chips/////
-  std::array<std::array<G4double, 3>, 4> chip = {{{6, -21, -4}, {6, -7, -4}, {6, 3, -4}, {6, 13, -4}}};
-
-  fNbOfChip = 4;
-  fLogicChip = new G4LogicalVolume*[fNbOfChip];
+  std::array<std::array<G4double, 3>, 4> chip = {{{3.5, -21, -4}, {3.5, -7, -4}, {3.5, 6, -4}, {3.5, 16, -4}}};
 
   G4Material* chipOuterMat = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");  //not sure if this is the name of a real plastic
   G4double chipOuterX {9}; //defining x, y, z lengths of the external plastic on the chip
@@ -299,7 +310,6 @@ for (G4int i{0}; i < 64; ++i)
                           false,                   //no boolean operation
                           copyNo,                       //copy number
                           checkOverlaps);          //overlaps checking
-    }
 
   G4Material* chipInnerMat = nist->FindOrBuildMaterial("G4_Si");  //not sure if this is the name of a real plastic
   G4double chipInnerX {8};   //defining x, y, z lengths of the components inside the chip
@@ -323,15 +333,17 @@ for (G4int i{0}; i < 64; ++i)
                     false,                //no boolean operation
                     0,                    //copy number? presumably the number of times it appears which will be more than 0     
                     checkOverlaps);
+    }
+
 
 
   /*
   AG creating the diode
   */
   G4Material* diodeOuterMat = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");  //not sure if this is the name of a real plastic
-  G4double diodeOuterX {1.8}; //defining x, y, z lengths of the diode
-  G4double diodeOuterY {1.35};
-  G4double diodeOuterZ {1.05};
+  G4double diodeOuterX {27}; //defining x, y, z lengths of the diode
+  G4double diodeOuterY {30};
+  G4double diodeOuterZ {1};
 
   G4Box* diodeOuter = 
     new G4Box("diodeOuter",                       //its name
@@ -343,7 +355,7 @@ for (G4int i{0}; i < 64; ++i)
                         "diodeOuter");      //its name
          
   new G4PVPlacement(0,                    //no rotation
-                    G4ThreeVector(0, 0, 0),      //coordinate
+                    G4ThreeVector(0, -14.5, 3),      //coordinate
                     logicDiodeOuter,      //it's logical volume
                     "diodeOuter",         //its name
                     logicEnv,             //its mother volume
@@ -353,9 +365,9 @@ for (G4int i{0}; i < 64; ++i)
   
 
   G4Material* diodeInnerMat = nist->FindOrBuildMaterial("G4_Si");  //not sure if this is the name of a real plastic
-  G4double diodeInnerX {0.7};   //defining x, y, z lengths of the sensor inside the diode
-  G4double diodeInnerY {0.7};  //note these are just an assumptions as we dont know the true size of the silicon inside the diodes
-  G4double diodeInnerZ {0.4};
+  G4double diodeInnerX {26};   //defining x, y, z lengths of the sensor inside the diode
+  G4double diodeInnerY {29};  //note these are just an assumptions as we dont know the true size of the silicon inside the diodes
+  G4double diodeInnerZ {4e-3};
 
   G4Box* diodeInner = 
     new G4Box("diodeInner",                       //its name
@@ -380,9 +392,9 @@ for (G4int i{0}; i < 64; ++i)
   Transistor
   */
   G4Material* transOuterMat = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");  //not sure if this is the name of a real plastic
-  G4double transOuterX {1.5}; //defining x, y, z lengths of the diode
-  G4double transOuterY {1.0};
-  G4double transOuterZ {1.0};
+  G4double transOuterX {9}; //defining x, y, z lengths of the diode
+  G4double transOuterY {4};
+  G4double transOuterZ {9};
 
   G4Box* transOuter = 
     new G4Box("transOuter",                       //its name
@@ -394,7 +406,7 @@ for (G4int i{0}; i < 64; ++i)
                         "transOuter");      //its name
          
   new G4PVPlacement(0,                    //no rotation
-                    G4ThreeVector(0, 0, 0),      //coordinate
+                    G4ThreeVector(-5, 16, 5),      //coordinate
                     logicTransOuter,      //it's logical volume
                     "transOuter",         //its name
                     logicEnv,             //its mother volume
@@ -404,9 +416,9 @@ for (G4int i{0}; i < 64; ++i)
   
 
   G4Material* transInnerMat = nist->FindOrBuildMaterial("G4_Si");  //not sure if this is the name of a real plastic
-  G4double transInnerX {1.4};   //defining x, y, z lengths of the sensor inside the diode
-  G4double transInnerY {0.9};  //note these are just an assumptions as we dont know the true size of the silicon inside the diodes
-  G4double transInnerZ {0.9};
+  G4double transInnerX {8};   //defining x, y, z lengths of the sensor inside the diode
+  G4double transInnerY {3};  //note these are just an assumptions as we dont know the true size of the silicon inside the diodes
+  G4double transInnerZ {8};
 
   G4Box* transInner = 
     new G4Box("transInner",                       //its name
@@ -446,7 +458,7 @@ for (G4int i{0}; i < 64; ++i)
 
   
   new G4PVPlacement(0,                    //no rotation
-                    G4ThreeVector(),      //coordinate
+                    G4ThreeVector(0, 25.5, 4),      //coordinate
                     logicCounterOuter,      //it's logical volume
                     "counterOuter",         //its name
                     logicEnv,             //its mother volume
@@ -483,9 +495,9 @@ for (G4int i{0}; i < 64; ++i)
 plastic seperator
 */
   G4Material* seperatorMat = nist->FindOrBuildMaterial("G4_PLASTIC_SC_VINYLTOLUENE");  //not sure if this is the name of a real plastic
-  G4double seperatorX {27.5};   //defining x, y, z lengths of the seperator sheet which all the components arr attatched to
-  G4double seperatorY {59.5};  
-  G4double seperatorZ {1};
+  G4double seperatorX {28};   //defining x, y, z lengths of the seperator sheet which all the components arr attatched to
+  G4double seperatorY {60};  
+  G4double seperatorZ {0.5};
 
   G4Box* seperator = 
     new G4Box("seperator",                       //its name
@@ -509,8 +521,9 @@ plastic seperator
 
   // Set Metal of Diode (inner diode) as scoring volume
   //
-  fScoringVolume = logicDiodeInner;
 
+  fScoringVolume = logicDiodeInner
+}
   //
   //always return the physical World
   //
