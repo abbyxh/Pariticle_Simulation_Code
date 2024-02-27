@@ -118,7 +118,7 @@ for(int i{0}; i < len; i += 2)
       pixelLocations[k + len * j + len * len * i][0] = k * env_sizeX;
 
       //every other z layer is offset
-      pixelLocations[k + len * j + len * len * (i + 1)][2] = i * env_sizeZ;
+      pixelLocations[k + len * j + len * len * (i + 1)][2] = (i+1) * env_sizeZ;
       pixelLocations[k + len * j + len * len * (i + 1)][1] = (j + 0.5) * env_sizeY;
       pixelLocations[k + len * j + len * len * (i + 1)][0] = (k + 0.5) * env_sizeX;
     }
