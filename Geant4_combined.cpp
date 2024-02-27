@@ -28,6 +28,7 @@
 /// \brief Implementation of the B1DetectorConstruction class
 
 #include <array>
+#include <vector>
 #include <iostream>
 #include "B1DetectorConstruction.hh"
 
@@ -46,12 +47,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 B1DetectorConstruction::B1DetectorConstruction()
-<<<<<<< HEAD
 : G4VUserDetectorConstruction()
-=======
-: G4VUserDetectorConstruction(),
-  fScoringVolume(0),
->>>>>>> e7d5e4f8b047deb2db2df264afc3e0e41bbbc051
 { }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -63,6 +59,7 @@ B1DetectorConstruction::~B1DetectorConstruction()
 
 G4VPhysicalVolume* B1DetectorConstruction::Construct()
 {  
+  std::vector<G4LogicalVolume*> fscoringVolume{};
   // Get nist material manager
   G4NistManager* nist = G4NistManager::Instance();
   
@@ -78,9 +75,11 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
   //     
   // World
   //
-  G4double world_sizeX = 20*env_sizeX;
-  G4double world_sizeY = 20*env_sizeY;
-  G4double world_sizeZ  = 20*env_sizeZ;
+  G4int len {4};
+
+  G4double world_sizeX = len*env_sizeX;
+  G4double world_sizeY = len*env_sizeY;
+  G4double world_sizeZ  = len*env_sizeZ;
   G4Material* world_mat = nist->FindOrBuildMaterial("G4_AIR");
   
   G4Box* solidWorld =    
@@ -109,7 +108,6 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
 ///Loop for envelope///
 
 
-int len {4};
 std::array<std::array<double, 3>, 64> pixelLocations{};
 
 for(int i{0}; i < len; i += 2)
@@ -118,14 +116,14 @@ for(int i{0}; i < len; i += 2)
   {
     for(int k{0}; k < len; ++k)
     {
-      pixelLocations[k + len * j + len * len * i][2] = i * env_sizeZ;
-      pixelLocations[k + len * j + len * len * i][1] = j * env_sizeY;
-      pixelLocations[k + len * j + len * len * i][0] = k * env_sizeX;
+      pixelLocations[k + len * j + len * len * i][2] = ((len / 2) - i) * env_sizeZ;
+      pixelLocations[k + len * j + len * len * i][1] = ((len / 2) - j) * env_sizeY;
+      pixelLocations[k + len * j + len * len * i][0] = ((len / 2) - k) * env_sizeX;
 
       //every other z layer is offset
-      pixelLocations[k + len * j + len * len * (i + 1)][2] = i * env_sizeZ;
-      pixelLocations[k + len * j + len * len * (i + 1)][1] = (j + 0.5) * env_sizeY;
-      pixelLocations[k + len * j + len * len * (i + 1)][0] = (k + 0.5) * env_sizeX;
+      pixelLocations[k + len * j + len * len * (i + 1)][2] = ((len / 2) - (i+1)) * env_sizeZ;
+      pixelLocations[k + len * j + len * len * (i + 1)][1] = ((len / 2) - (j + 0.5)) * env_sizeY;
+      pixelLocations[k + len * j + len * len * (i + 1)][0] = ((len / 2) - (k + 0.5)) * env_sizeX;
     }
   }
 }
@@ -188,18 +186,6 @@ for (G4int i{0}; i < 64; ++i)
                       
       G4LogicalVolume* logicResOut =                         
         new G4LogicalVolume(solidShape3, res_mat_outer, "Resistor_out", 0, 0, 0);           //its name
-<<<<<<< HEAD
-=======
-                    
-      new G4PVPlacement(0,                       //no rotation
-                        pos_res_outer,                    //at position
-                        logicResOut,             //its logical volume
-                        "Resistor_out",                //its name
-                        logicEnv,                //its mother  volume
-                        false,                   //no boolean operation
-                        copyNo,                       //copy number
-                        checkOverlaps);          //overlaps checking
->>>>>>> e7d5e4f8b047deb2db2df264afc3e0e41bbbc051
 
     if (copyNo<5)
     {
@@ -265,7 +251,6 @@ for (G4int i{0}; i < 64; ++i)
 
   for (G4int copyNo=0; copyNo<3; copyNo++) {
 
-<<<<<<< HEAD
     G4ThreeVector pos_cap_outer = G4ThreeVector(capacitor[copyNo][0], capacitor[copyNo][1], capacitor[copyNo][2]);
             
     G4LogicalVolume* logicCapOut = 
@@ -299,40 +284,6 @@ for (G4int i{0}; i < 64; ++i)
                       checkOverlaps);  
     }
 
-=======
-      G4ThreeVector pos_cap_outer = G4ThreeVector(capacitor[copyNo][0], capacitor[copyNo][1], capacitor[copyNo][2]);
-              
-      G4LogicVolume* logicCapOut = 
-        new G4LogicalVolume(solidShape1, cap_mat_outer, "Capacitor_out", 0, 0, 0);           
-                    
-      new G4PVPlacement(0,                       //no rotation
-                        pos_cap_outer,                    //at position
-                        logicCapOut,             //its logical volume
-                        "Capacitor_out",                //its name
-                        logicEnv,                //its mother  volume
-                        false,                   //no boolean operation
-                        copyNo,                       //copy number
-                        checkOverlaps);          //overlaps checking
-    }
-
-  ///Inner Capacitor///
-
-  G4Tubs* solidShape2 =    
-    new G4Tubs("Capacitor_in", 
-    0., inner_cap_radius, inner_cap_height/2, 0. * deg, 360. * deg);
-                      
-  G4LogicVolume* logicCapIn = 
-    G4LogicalVolume(solidShape2, cap_mat_inner, "Capacitor_in", 0, 0, 0); 
-               
-  new G4PVPlacement(0,                       //no rotation
-                    G4ThreeVector(0, 0, 0),                    //at position
-                    logicCapIn,             //its logical volume
-                    "Capacitor_in",                //its name
-                    logicCapOut,                //its mother  volume
-                    false,                   //no boolean operation
-                    0,                       //copy number
-                    checkOverlaps);  
->>>>>>> e7d5e4f8b047deb2db2df264afc3e0e41bbbc051
 
   /////For the chips/////
   std::array<std::array<G4double, 3>, 4> chip = {{{3.5, -21, -4}, {3.5, -7, -4}, {3.5, 6, -4}, {3.5, 16, -4}}};
@@ -575,7 +526,8 @@ plastic seperator
   // Set Metal of Diode (inner diode) as scoring volume
   //
 
-  fScoringVolume = logicDiodeInner
+  fscoringVolume.push_back(logicDiodeInner);
+
 }
   //
   //always return the physical World
