@@ -80,6 +80,7 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
   G4double world_sizeX = len*env_sizeX;
   G4double world_sizeY = len*env_sizeY;
   G4double world_sizeZ  = len*env_sizeZ;
+
   G4Material* world_mat = nist->FindOrBuildMaterial("G4_AIR");
   
   G4Box* solidWorld =    
@@ -121,6 +122,7 @@ for(int i{0}; i < len; i += 2)
       pixelLocations[k + len * j + len * len * i][0] = ((len / 2) - k) * env_sizeX;
 
       //every other z layer is offset
+      
       pixelLocations[k + len * j + len * len * (i + 1)][2] = ((len / 2) - (i+1)) * env_sizeZ;
       pixelLocations[k + len * j + len * len * (i + 1)][1] = ((len / 2) - (j + 0.5)) * env_sizeY;
       pixelLocations[k + len * j + len * len * (i + 1)][0] = ((len / 2) - (k + 0.5)) * env_sizeX;
