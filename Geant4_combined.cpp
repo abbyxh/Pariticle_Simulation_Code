@@ -117,15 +117,15 @@ for(int i{0}; i < len; i += 2)
   {
     for(int k{0}; k < len; ++k)
     {
-      pixelLocations[k + len * j + len * len * i][2] = ((len / 2) - i) * env_sizeZ;
-      pixelLocations[k + len * j + len * len * i][1] = ((len / 2) - j) * env_sizeY;
-      pixelLocations[k + len * j + len * len * i][0] = ((len / 2) - k) * env_sizeX;
+      pixelLocations[k + len * j + len * len * i][2] = (i - ((len - 1) / 2)) * env_sizeZ;
+      pixelLocations[k + len * j + len * len * i][1] = (j - ((len - 1) / 2)) * env_sizeY;
+      pixelLocations[k + len * j + len * len * i][0] = (k - ((len - 1) / 2)) * env_sizeX;
 
       //every other z layer is offset
       
-      pixelLocations[k + len * j + len * len * (i + 1)][2] = ((len / 2) - (i+1)) * env_sizeZ;
-      pixelLocations[k + len * j + len * len * (i + 1)][1] = ((len / 2) - (j + 0.5)) * env_sizeY;
-      pixelLocations[k + len * j + len * len * (i + 1)][0] = ((len / 2) - (k + 0.5)) * env_sizeX;
+      pixelLocations[k + len * j + len * len * (i + 1)][2] = ((i+1) - ((len - 1) / 2)) * env_sizeZ;
+      pixelLocations[k + len * j + len * len * (i + 1)][1] = ((j + 0.5) - ((len - 1) / 2)) * env_sizeY;
+      pixelLocations[k + len * j + len * len * (i + 1)][0] = ((k + 0.5) - ((len - 1) / 2)) * env_sizeX;
     }
   }
 }
