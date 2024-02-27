@@ -73,9 +73,9 @@ G4VPhysicalVolume* B1DetectorConstruction::Construct()
   //     
   // World
   //
-  G4double world_sizeX = 20*env_sizeX;
-  G4double world_sizeY = 20*env_sizeY;
-  G4double world_sizeZ  = 20*env_sizeZ;
+  G4double world_sizeX = 5*env_sizeX;
+  G4double world_sizeY = 5*env_sizeY;
+  G4double world_sizeZ  = 5*env_sizeZ;
   G4Material* world_mat = nist->FindOrBuildMaterial("G4_AIR");
   
   G4Box* solidWorld =    
