@@ -24,8 +24,8 @@
 // ********************************************************************
 //
 //
-/// \file B1/include/DetectorConstruction.hh
-/// \brief Definition of the B1::DetectorConstruction class
+/// \file B1DetectorConstruction.hh
+/// \brief Definition of the B1DetectorConstruction class
 
 #ifndef B1DetectorConstruction_h
 #define B1DetectorConstruction_h 1
@@ -33,29 +33,30 @@
 #include "G4VUserDetectorConstruction.hh"
 #include "globals.hh"
 
+#include <vector>
+
 class G4VPhysicalVolume;
 class G4LogicalVolume;
 
+
 /// Detector construction class to define materials and geometry.
 
-namespace B1
-{
-
-class DetectorConstruction : public G4VUserDetectorConstruction
+class B1DetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
-    DetectorConstruction() = default;
-    ~DetectorConstruction() override = default;
+    B1DetectorConstruction();
+    virtual ~B1DetectorConstruction();
 
-    G4VPhysicalVolume* Construct() override;
-
-    G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
+    virtual G4VPhysicalVolume* Construct();
+    
+    //changed fscoringvolume into a vector rather than a single value
+    std::vector<G4LogicalVolume*> GetScoringVolume() const { return fScoringVolume; }
 
   protected:
-    G4LogicalVolume* fScoringVolume = nullptr;
+    std::vector<G4LogicalVolume*>  fScoringVolume;
 };
 
-}
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
