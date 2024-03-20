@@ -24,8 +24,8 @@
 // ********************************************************************
 //
 //
-/// \file B1/include/SteppingAction.hh
-/// \brief Definition of the B1::SteppingAction class
+/// \file B1SteppingAction.hh
+/// \brief Definition of the B1SteppingAction class
 
 #ifndef B1SteppingAction_h
 #define B1SteppingAction_h 1
@@ -33,31 +33,28 @@
 #include "G4UserSteppingAction.hh"
 #include "globals.hh"
 
+#include <vector>
+
+class B1EventAction;
+
 class G4LogicalVolume;
 
 /// Stepping action class
-///
+/// 
 
-namespace B1
-{
-
-class EventAction;
-
-class SteppingAction : public G4UserSteppingAction
+class B1SteppingAction : public G4UserSteppingAction
 {
   public:
-    SteppingAction(EventAction* eventAction);
-    ~SteppingAction() override = default;
+    B1SteppingAction(B1EventAction* eventAction);
+    virtual ~B1SteppingAction();
 
     // method from the base class
-    void UserSteppingAction(const G4Step*) override;
+    virtual void UserSteppingAction(const G4Step*);
 
   private:
-    EventAction* fEventAction = nullptr;
-    G4LogicalVolume* fScoringVolume = nullptr;
+    B1EventAction*  fEventAction;
+    std::vector<G4LogicalVolume*> fScoringVolume; //made fScoringVolume a vector
 };
-
-}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
