@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Harrison"
+  given-names: "Abigail"
+- family-names: "Griffiths"
+  given-names: "Archie"
+title: "Pariticle_Simulation_Code"
+version: 1.0.0
+doi: 10.5281/zenodo.1234
+date-released: 2024-03-20
+url: "https://github.com/abbyxh/Pariticle_Simulation_Code"
