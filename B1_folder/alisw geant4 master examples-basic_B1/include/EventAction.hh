@@ -24,40 +24,34 @@
 // ********************************************************************
 //
 //
-/// \file B1PrimaryGeneratorAction.hh
-/// \brief Definition of the B1PrimaryGeneratorAction class
+/// \file B1EventAction.hh
+/// \brief Definition of the B1EventAction class
 
-#ifndef B1PrimaryGeneratorAction_h
-#define B1PrimaryGeneratorAction_h 1
+#ifndef B1EventAction_h
+#define B1EventAction_h 1
 
-#include "G4VUserPrimaryGeneratorAction.hh"
-#include "G4ParticleGun.hh"
+#include "G4UserEventAction.hh"
 #include "globals.hh"
 
-class G4ParticleGun;
-class G4Event;
-class G4Box;
+class B1RunAction;
 
-/// The primary generator action class with particle gun.
+/// Event action class
 ///
-/// The default kinematic is a 6 MeV gamma, randomly distribued 
-/// in front of the phantom across 80% of the (X,Y) phantom size.
 
-class B1PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
+class B1EventAction : public G4UserEventAction
 {
   public:
-    B1PrimaryGeneratorAction();    
-    virtual ~B1PrimaryGeneratorAction();
+    B1EventAction(B1RunAction* runAction);
+    virtual ~B1EventAction();
 
-    // method from the base class
-    virtual void GeneratePrimaries(G4Event*);         
-  
-    // method to access particle gun
-    const G4ParticleGun* GetParticleGun() const { return fParticleGun; }
-  
+    virtual void BeginOfEventAction(const G4Event* event);
+    virtual void EndOfEventAction(const G4Event* event);
+
+    void AddEdep(G4double edep) { fEdep += edep; }
+
   private:
-    G4ParticleGun*  fParticleGun; // pointer a to G4 gun class
-    G4Box* fEnvelopeBox;
+    B1RunAction* fRunAction;
+    G4double     fEdep;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
