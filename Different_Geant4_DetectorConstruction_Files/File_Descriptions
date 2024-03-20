@@ -1,0 +1,3 @@
+Archie_code.cpp = code using arrays of diodes on the pixel using newest font end design
+Geant4_combined.cpp = code using previous front end design
+Geant4_new_pixel_design.cpp = code using newest front end design and a large singular diode (to act as multiple diodes)
