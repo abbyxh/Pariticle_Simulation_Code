@@ -24,8 +24,8 @@
 // ********************************************************************
 //
 //
-/// \file B1/include/ActionInitialization.hh
-/// \brief Definition of the B1::ActionInitialization class
+/// \file B1ActionInitialization.hh
+/// \brief Definition of the B1ActionInitialization class
 
 #ifndef B1ActionInitialization_h
 #define B1ActionInitialization_h 1
@@ -34,20 +34,15 @@
 
 /// Action initialization class.
 
-namespace B1
-{
-
-class ActionInitialization : public G4VUserActionInitialization
+class B1ActionInitialization : public G4VUserActionInitialization
 {
   public:
-    ActionInitialization() = default;
-    ~ActionInitialization() override = default;
+    B1ActionInitialization();
+    virtual ~B1ActionInitialization();
 
-    void BuildForMaster() const override;
-    void Build() const override;
+    virtual void BuildForMaster() const;
+    virtual void Build() const;
 };
-
-}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
