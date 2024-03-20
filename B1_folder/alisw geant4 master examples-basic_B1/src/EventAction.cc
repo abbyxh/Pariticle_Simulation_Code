@@ -24,39 +24,41 @@
 // ********************************************************************
 //
 //
-/// \file B1/src/EventAction.cc
-/// \brief Implementation of the B1::EventAction class
+/// \file B1EventAction.cc
+/// \brief Implementation of the B1EventAction class
 
-#include "EventAction.hh"
-#include "RunAction.hh"
+#include "B1EventAction.hh"
+#include "B1RunAction.hh"
 
 #include "G4Event.hh"
 #include "G4RunManager.hh"
 
-namespace B1
-{
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+B1EventAction::B1EventAction(B1RunAction* runAction)
+: G4UserEventAction(),
+  fRunAction(runAction),
+  fEdep(0.)
+{} 
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-EventAction::EventAction(RunAction* runAction)
-: fRunAction(runAction)
+B1EventAction::~B1EventAction()
 {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void EventAction::BeginOfEventAction(const G4Event*)
-{
+void B1EventAction::BeginOfEventAction(const G4Event*)
+{    
   fEdep = 0.;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void EventAction::EndOfEventAction(const G4Event*)
-{
+void B1EventAction::EndOfEventAction(const G4Event*)
+{   
   // accumulate statistics in run action
   fRunAction->AddEdep(fEdep);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-}
