@@ -24,10 +24,10 @@
 // ********************************************************************
 //
 //
-/// \file B1/src/PrimaryGeneratorAction.cc
-/// \brief Implementation of the B1::PrimaryGeneratorAction class
+/// \file B1PrimaryGeneratorAction.cc
+/// \brief Implementation of the B1PrimaryGeneratorAction class
 
-#include "PrimaryGeneratorAction.hh"
+#include "B1PrimaryGeneratorAction.hh"
 
 #include "G4LogicalVolumeStore.hh"
 #include "G4LogicalVolume.hh"
@@ -39,36 +39,52 @@
 #include "G4SystemOfUnits.hh"
 #include "Randomize.hh"
 
-namespace B1
-{
+#include <random>
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-PrimaryGeneratorAction::PrimaryGeneratorAction()
+B1PrimaryGeneratorAction::B1PrimaryGeneratorAction()
+: G4VUserPrimaryGeneratorAction(),
+  fParticleGun(0), 
+  fEnvelopeBox(0)
 {
-  G4int n_particle = 1;
+  G4int n_particle = 100000;
   fParticleGun  = new G4ParticleGun(n_particle);
 
-  // default particle kinematic
+  //added in a random number generator for the x and y directions of the particles
+  double upperBoundx {0.5};
+  double lowerBoundx {-0.5};
+  std::uniform_real_distribution<double> unifx(lowerBoundx, upperBoundx);
+  std::random_device randx;
+
+  double upperBoundy {0.5};
+  double lowerBoundy {-0.5};
+  std::uniform_real_distribution<double> unify(lowerBoundy, upperBoundy);
+  std::random_device randy;
+
+  G4double x{unifx(randx)};
+  G4double y{unify(randy)};
+
+  //edited the direction, energy and type of the particle
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
   G4String particleName;
   G4ParticleDefinition* particle
-    = particleTable->FindParticle(particleName="gamma");
+    = particleTable->FindParticle(particleName="mu-");
   fParticleGun->SetParticleDefinition(particle);
-  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
-  fParticleGun->SetParticleEnergy(6.*MeV);
+  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0., 0., 1.));
+  fParticleGun->SetParticleEnergy(2*MeV);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-PrimaryGeneratorAction::~PrimaryGeneratorAction()
+B1PrimaryGeneratorAction::~B1PrimaryGeneratorAction()
 {
   delete fParticleGun;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
+void B1PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 {
   //this function is called at the begining of ecah event
   //
@@ -76,7 +92,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   // In order to avoid dependence of PrimaryGeneratorAction
   // on DetectorConstruction class we get Envelope volume
   // from G4LogicalVolumeStore.
-
+  
   G4double envSizeXY = 0;
   G4double envSizeZ = 0;
 
@@ -90,28 +106,26 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
   if ( fEnvelopeBox ) {
     envSizeXY = fEnvelopeBox->GetXHalfLength()*2.;
     envSizeZ = fEnvelopeBox->GetZHalfLength()*2.;
-  }
+  }  
   else  {
     G4ExceptionDescription msg;
-    msg << "Envelope volume of box shape not found.\n";
+    msg << "Envelope volume of box shape not found.\n"; 
     msg << "Perhaps you have changed geometry.\n";
     msg << "The gun will be place at the center.";
-    G4Exception("PrimaryGeneratorAction::GeneratePrimaries()",
+    G4Exception("B1PrimaryGeneratorAction::GeneratePrimaries()",
      "MyCode0002",JustWarning,msg);
   }
 
-  G4double size = 0.8;
+  G4double size = 0.8; 
   G4double x0 = size * envSizeXY * (G4UniformRand()-0.5);
   G4double y0 = size * envSizeXY * (G4UniformRand()-0.5);
   G4double z0 = -0.5 * envSizeZ;
-
+  
   fParticleGun->SetParticlePosition(G4ThreeVector(x0,y0,z0));
 
   fParticleGun->GeneratePrimaryVertex(anEvent);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-}
 
 
