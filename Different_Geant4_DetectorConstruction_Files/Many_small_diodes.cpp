@@ -369,6 +369,7 @@ for (G4int i{0}; i < lenCubed; ++i)
   G4double diodeOuterY {0.4};
   G4double diodeOuterZ {0.4};
 
+  //creating the box for the diode outer outside the loop so it doesnt need to be created multiple times
   G4Box* diodeOuter = 
     new G4Box("diodeOuter",                       //its name
         0.5 * diodeOuterX, 0.5 * diodeOuterY, 0.5 * diodeOuterZ);   //its size
@@ -379,14 +380,21 @@ G4Material* diodeInnerMat = nist->FindOrBuildMaterial("G4_Si");  //not sure if t
         G4double diodeInnerZ {4e-3};
 //diodes going in a square, so only enter values for square numbers, and their root
 
+/*
+creating a square of diodes using 2 for loops for the 2 dimensions, these need to loop over the lenght of the side of the square
+i.e. the square root of the number of diodes
+*/
 G4double sqrtNoOfDiodes {20};
 
-G4double bottomLeft{0.5 * sqrtNoOfDiodes * (diodeOuterX + 1)};
-
+//looping over the x coordinate for the diodes
 for(G4int xCoord{0}; xCoord < sqrtNoOfDiodes; ++xCoord)
 {
+    //looping over the y coordinate for the diodes
     for(G4int yCoord{0}; yCoord < sqrtNoOfDiodes; ++yCoord)
     {
+
+
+        //creating a new logical volume and placement for each diode
         G4LogicalVolume* logicDiodeOuter = 
             new G4LogicalVolume(diodeOuter,         //its solid ?? presumably means filled by diodeOuter
                                 diodeOuterMat,      //its material
@@ -398,10 +406,11 @@ for(G4int xCoord{0}; xCoord < sqrtNoOfDiodes; ++xCoord)
                             "diodeOuter",         //its name
                             logicEnv,             //its mother volume
                             false,                //no boolean operation
-                            0,                    //copy number? presumably the number of times it appears which will be more than 0     
+                            xCoord + sqrtNoOfDiodes * y coord,         //copy number?of the diodes for the individual pixel  
                             checkOverlaps);       //overlaps checking
         
 
+        //defining the inner diode for each diode
         G4Box* diodeInner = 
           new G4Box("diodeInner",                       //its name
               0.5 * diodeInnerX, 0.5 * diodeInnerY, 0.5 * diodeInnerZ);   //its size
@@ -420,7 +429,7 @@ for(G4int xCoord{0}; xCoord < sqrtNoOfDiodes; ++xCoord)
                           0,                    //copy number? presumably the number of times it appears which will be more than 0     
                           checkOverlaps);
 
-
+        //appending each new diode to vector of scoring volumes
         fScoringVolume.push_back(logicDiodeInner);
     }
 }
